@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffe8f0">
+  <title>Will you be mine? · a cat asks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{font-family:"Comic Relief","Comic Sans MS",cursive;color:#76505f;font-synthesis:none;font-optical-sizing:auto;font-weight:400;background:#ffe8f0}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:24px;background:linear-gradient(118deg,#fff0f5 3%,#ffebf2 45%,#ffdce9 100%)}
+    .sound-toggle{position:fixed;top:16px;right:16px;width:44px;height:44px;display:grid;place-items:center;border:1px solid #fff;background:#ffffffbd;color:#795365;border-radius:50%;box-shadow:0 4px 14px #b24a6c14;cursor:pointer;transition:transform .2s,box-shadow .2s}
+    .sound-toggle:hover{transform:translateY(-2px);box-shadow:0 7px 18px #b24a6c24}
+    .sound-toggle svg{width:20px;height:20px}
+    .card{position:relative;top:-26px;width:min(382px,100%);padding:34px 35px 38px;text-align:center;background:#fffafd;border:1px solid #fff;border-radius:29px;box-shadow:0 24px 55px #b84f7021,0 5px 16px #b84f7010;animation:appear .55s ease-out both,float 6s ease-in-out .55s infinite}
+    .cat-photo{width:100%;aspect-ratio:4/3;border-radius:19px;background-image:url("./kitten-pair.png");background-size:auto 200%;background-position:center top;background-repeat:no-repeat;box-shadow:0 8px 18px #43262b24;transition:transform .35s,filter .35s}
+    .card.accepted .cat-photo{background-position:center bottom;transform:scale(1.015)}
+    h1{max-width:290px;margin:24px auto 0;color:#d93472;font-size:clamp(29px,8vw,35px);font-weight:700;line-height:1.05;letter-spacing:-.035em}
+    .paw{display:inline-block;margin-left:5px;color:#51415f;font-size:.72em;vertical-align:4px;letter-spacing:-.12em}
+    .subtitle{min-height:25px;margin:10px 0 20px;color:#886c78;font-size:15px;line-height:1.5}
+    .btn-group{position:relative;width:min(224px,100%);height:52px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .btn{height:52px;border-radius:999px;padding:0 25px;font:700 18px/1 "Comic Relief","Comic Sans MS",cursive;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}
+    .btn:focus-visible,.sound-toggle:focus-visible{outline:3px solid #763b80;outline-offset:3px}
+    .yes-btn{width:124px;border:0;background:linear-gradient(135deg,#f35b91,#df3473);color:#fff;box-shadow:0 9px 17px #e4407d38;scale:var(--grow,1)}
+    .yes-btn:hover{transform:translateY(-2px) scale(1.035);box-shadow:0 12px 22px #e4407d48}
+    .yes-btn:active{transform:scale(.97)}
+    .no-btn{position:absolute;left:139px;top:0;min-width:84px;border:2px solid #f7dce6;background:#fff;color:#d7437a;box-shadow:0 3px 7px #a5436410;scale:var(--shrink,1);transition:left .32s cubic-bezier(.34,1.56,.64,1),top .32s cubic-bezier(.34,1.56,.64,1),scale .28s ease,box-shadow .28s ease;will-change:left,top,scale}
+    .no-btn.is-dodging{position:fixed;z-index:5;margin:0}
+    .no-btn:hover{background:#fff6fa}
+    .card.accepted .btn-group{justify-content:center}
+    .card.accepted .yes-btn{width:auto;min-width:170px}
+    .card.accepted .no-btn{display:none}
+    @keyframes appear{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @media(max-width:420px){body{padding:18px}.card{padding:23px 22px 28px;border-radius:25px;top:-8px}.cat-photo{border-radius:16px}.subtitle{font-size:14px;margin-bottom:20px}.sound-toggle{top:12px;right:12px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Mute sound effects" aria-pressed="false" title="Sound on">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6m2.5-8.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <main class="card" id="card">
+    <div class="cat-photo" id="cat-photo" role="img" aria-label="A shy kitten peeking from behind its paw"></div>
+    <h1 id="question" aria-live="polite">Will you be mine? <span class="paw" aria-hidden="true">🐾</span></h1>
+    <p class="subtitle" id="subtitle">asked by a very small, very serious cat</p>
+    <div class="btn-group">
+      <button class="btn yes-btn" id="yes-btn" type="button">Yes 💕</button>
+      <button class="btn no-btn" id="no-btn" type="button">No</button>
+    </div>
+  </main>
+  <script>
+    const card=document.querySelector('#card');
+    const noButton=document.querySelector('#no-btn');
+    const soundToggle=document.querySelector('#sound-toggle');
+    const noReplies=['Are you sure?','Think again 🥺','One more chance? 💕','Pretty please? 🙏','Just say Yes!','Meow? 🐾'];
+    let noCount=0,muted=false,audioContext;
+
+    function chime(frequency=660){
+      if(muted||!window.AudioContext)return;
+      audioContext??=new AudioContext();
+      const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();
+      oscillator.type='sine';oscillator.frequency.value=frequency;gain.gain.setValueAtTime(.0001,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.09,audioContext.currentTime+.02);gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+.22);oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start();oscillator.stop(audioContext.currentTime+.23);
+    }
+
+    function dodge(event){
+      noButton.textContent=noReplies[Math.min(noCount,noReplies.length-1)];
+      noCount=Math.min(noCount+1,noReplies.length);
+      document.querySelector('#yes-btn').style.setProperty('--grow',String(Math.min(1+noCount*.12,1.7)));
+      noButton.style.setProperty('--shrink',String(Math.max(1-noCount*.055,.66)));
+      const rect=noButton.getBoundingClientRect();
+      if(!noButton.classList.contains('is-dodging')){
+        noButton.classList.add('is-dodging');
+        noButton.style.left=`${rect.left}px`;noButton.style.top=`${rect.top}px`;
+        noButton.getBoundingClientRect();
+      }
+      const width=noButton.offsetWidth*parseFloat(getComputedStyle(noButton).scale||'1');
+      const height=noButton.offsetHeight*parseFloat(getComputedStyle(noButton).scale||'1');
+      const maxX=Math.max(18,innerWidth-width-18),maxY=Math.max(18,innerHeight-height-18);
+      let x=18+Math.random()*Math.max(0,maxX-18),y=18+Math.random()*Math.max(0,maxY-18);
+      if(event&&Math.hypot(x+width/2-event.clientX,y+height/2-event.clientY)<150){x=x>innerWidth/2?18:maxX;y=y>innerHeight/2?18:maxY}
+      noButton.style.left=`${x}px`;noButton.style.top=`${y}px`;
+    }
+
+    noButton.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')dodge(event)});
+    noButton.addEventListener('click',event=>{event.preventDefault();dodge(event);chime(440)});
+    document.querySelector('#yes-btn').addEventListener('click',()=>{
+      card.classList.add('accepted');
+      document.querySelector('#cat-photo').setAttribute('aria-label','A happy kitten hugging its paws with joy');
+      document.querySelector('#question').innerHTML='You said yes! <span class="paw" aria-hidden="true">💕</span>';
+      document.querySelector('#subtitle').textContent='the happiest little cat in the whole world';
+      document.querySelector('#yes-btn').textContent='Yay! 💖';
+      chime(784);
+    });
+    soundToggle.addEventListener('click',()=>{
+      muted=!muted;soundToggle.setAttribute('aria-pressed',String(muted));
+      soundToggle.setAttribute('aria-label',muted?'Turn sound effects on':'Mute sound effects');
+      soundToggle.title=muted?'Sound off':'Sound on';
+      soundToggle.innerHTML=muted
+        ?'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="m17 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+        :'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6m2.5-8.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    });
+  </script>
+</body>
+</html>
